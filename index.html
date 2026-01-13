@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>🍿 PopcornPick</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="title">🍿 PopcornPick</div>
+      <div>- Lights.Camera.POPcorn</div>
+    </div>
+
+    <nav class="nav">
+      <a href="#/movies" id="navMovies" class="active">Movies</a>
+      <a href="#/shows" id="navShows">TV Shows</a>
+      <a href="#/watchlist" id="navWatchlist">Watchlist</a>
+
+      <select id="genreFilter" class="navPill">
+        <option value="">All Genres</option>
+        <option value="28">Action</option>
+        <option value="35">Comedy</option>
+        <option value="18">Drama</option>
+        <option value="53">Thriller</option>
+        <option value="10749">Romance</option>
+        <option value="27">Horror</option>
+        <option value="878">Sci-Fi</option>
+      </select>
+
+      <select id="ratingFilter" class="navPill">
+        <option value="">Any Rating</option>
+        <option value="6">⭐ 6+</option>
+        <option value="7">⭐ 7+</option>
+        <option value="8">⭐ 8+</option>
+      </select>
+
+      <select id="languageFilter" class="navPill">
+        <option value="">All Languages</option>
+        <option value="hi">Hindi</option>
+        <option value="ta">Tamil</option>
+        <option value="te">Telugu</option>
+        <option value="kn">Kannada</option>
+        <option value="ml">Malayalam</option>
+        <option value="en">English</option>
+      </select>
+
+      <select id="moodFilter" class="navPill">
+        <option value="">Any Mood</option>
+        <option value="feelgood">😊 Feel Good</option>
+        <option value="thriller">😱 Thriller</option>
+        <option value="romantic">❤️ Romantic</option>
+        <option value="family">👨‍👩‍👧 Family</option>
+      </select>
+    </nav>
+
+    <div class="controls">
+      <input id="searchBox" class="input" placeholder="Search..." />
+      <div id="authArea">
+        <div id="profileWrapper" style="display:none">
+          <div id="profileAvatar"></div>
+          <div id="profileMenu">
+            <button id="logoutBtn">Logout</button>
+          </div>
+        </div>
+
+        <button id="loginBtn" class="cta">Sign In</button>
+      </div>
+
+  </header>
+
+  <main id="app">
+    <section class="homeSection">
+      <h2>🔥 Trending Today</h2>
+      <div class="row" id="trendingMovies"></div>
+      <div class="row" id="trendingShows"></div>
+
+    </section>
+
+    <section class="homeSection">
+      <h2>🕒 Continue Watching</h2>
+      <div class="row" id="continueRow"></div>
+    </section>
+
+    <section class="homeSection">
+      <h2>🎯 Recommended</h2>
+      <div class="row" id="recommendedRow"></div>
+    </section>
+
+    <section class="homeSection">
+      <h2>🎬 Browse All</h2>
+      <div class="grid"></div>
+    </section>
+  </main>
+
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="modal">
+    <div class="box" onclick="event.stopPropagation()">
+      <span id="closeAuth" class="closeBtn">✕</span>
+
+      <h2 id="authTitle">Sign In</h2>
+      <input id="authName" placeholder="Name" style="display:none">
+      <input id="authEmail" placeholder="Email">
+      <input id="authPassword" type="password" placeholder="Password">
+
+      <button id="authSubmit" type="button" class="cta" style="width:100%">
+        Continue
+      </button>
+
+      <p id="authToggle" style="cursor:pointer;color:#ffcc00;margin-top:10px">
+        Don't have an account? Create one
+      </p>
+
+      <div id="authMsg"></div>
+    </div>
+  </div>
+
+  <!-- MOVIE DETAILS OVERLAY (MUST BE EMPTY, JS FILLS IT) -->
+  <div id="infoOverlay"></div>
+
+  <!-- JS -->
+  <script src="script.js"></script>
+
+
+</body>
+
+</html>

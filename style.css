@@ -1,0 +1,893 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial;
+  background: #0f0f12;
+  color: #00ffff;
+}
+
+/* HEADER */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, .75);
+  backdrop-filter: blur(12px);
+}
+
+/* LOGO */
+.logo .title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffcc00;
+}
+
+.logo div:last-child {
+  font-size: .8rem;
+  color: #aaa;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav a,
+.navPill {
+  padding: 10px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  background: rgba(0, 255, 255, .08);
+  border: 1px solid rgba(0, 255, 255, .25);
+  color: #00ffff;
+  cursor: pointer;
+  transition: all .3s ease;
+}
+
+.nav a:hover,
+.navPill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(0, 255, 255, .6);
+}
+
+.nav a.active {
+  color: #ffcc00;
+  border-color: #ffcc00;
+}
+
+/* FILTER SELECT LOOK LIKE BUTTON */
+.navPill {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #00ffff 50%),
+    linear-gradient(135deg, #00ffff 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 50%,
+    calc(100% - 10px) 50%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* CONTROLS */
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.input {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: none;
+}
+
+/* BUTTON */
+button.cta {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #ffcc00;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.small {
+  padding: 4px 10px;
+}
+
+/* GRID */
+main {
+  padding: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.card img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+/* OVERLAY */
+#infoOverlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: rgba(0, 0, 0, .95);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.infoCard {
+  width: 90%;
+  max-width: 1100px;
+  background: #1f2024;
+  border-radius: 14px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+}
+
+.infoCard img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: rgba(0, 0, 0, .8);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal .box {
+  background: #1f2024;
+  padding: 20px;
+  width: 300px;
+  border-radius: 12px;
+}
+
+.link {
+  color: #ffcc00;
+  cursor: pointer;
+}
+
+/* ROWS */
+.row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.row::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, .4);
+  border-radius: 6px;
+}
+
+.row .card {
+  min-width: 180px;
+}
+
+/* HOVER PREVIEW */
+.card {
+  position: relative;
+}
+
+.card::after {
+  content: attr(data-info);
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .8);
+  color: white;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: .3s;
+  border-radius: 14px;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+/* WATCHLIST */
+.star {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.homeSection {
+  margin-bottom: 32px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.row::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, .4);
+  border-radius: 6px;
+}
+
+.row .card {
+  min-width: 180px;
+}
+
+.reviewItem {
+  padding: 10px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, .05);
+  border-radius: 8px;
+}
+
+.reviewBox textarea {
+  width: 100%;
+  min-height: 80px;
+  margin-top: 6px;
+  border-radius: 6px;
+}
+
+/* AUTH MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal .box {
+  background: #1f2024;
+  padding: 24px;
+  width: 360px;
+  border-radius: 14px;
+  position: relative;
+}
+
+.modal input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #ffcc00;
+}
+
+/* KEEP YOUR EXISTING CSS EXACTLY */
+
+/* ADDITION FOR CARD ACTIONS */
+.cardActions {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.cardActions a {
+  flex: 1;
+  background: rgba(0, 0, 0, .75);
+  color: #ffcc00;
+  text-align: center;
+  padding: 4px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.cardActions a:hover {
+  background: #ffcc00;
+  color: black;
+}
+
+.card {
+  position: relative;
+}
+
+.cardLinks {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.cardLinks a {
+  flex: 1;
+  background: rgba(0, 0, 0, .8);
+  color: #ffcc00;
+  font-size: 12px;
+  text-align: center;
+  padding: 4px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.cardLinks a:hover {
+  background: #ffcc00;
+  color: black;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: rgba(0, 0, 0, .85);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal .box {
+  background: #1f2024;
+  padding: 24px;
+  width: 360px;
+  border-radius: 14px;
+  position: relative;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #ffcc00;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+#authArea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid #ffcc00;
+}
+
+.logoutBtn {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+#authArea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #ffcc00;
+}
+
+.logoutBtn {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+#infoOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  /* JS will change this to flex */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  /* VERY IMPORTANT */
+  pointer-events: auto;
+  /* VERY IMPORTANT */
+}
+
+#infoOverlay .infoCard {
+  background: #111;
+  color: #fff;
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+#infoOverlay img {
+  width: 250px;
+  border-radius: 10px;
+}
+
+/* ===== FIX DETAILS MODAL ===== */
+
+#infoOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0, 0, 0, 0.85);
+
+  display: none;
+  /* JS sets it to flex */
+  align-items: center;
+  justify-content: center;
+
+  z-index: 10000;
+  /* 🔥 MOST IMPORTANT */
+  pointer-events: auto;
+}
+
+#infoOverlay .infoCard {
+  background: #111;
+  color: #fff;
+
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  border-radius: 12px;
+  padding: 20px;
+
+  display: flex;
+  gap: 20px;
+}
+
+#infoOverlay img {
+  width: 250px;
+  border-radius: 10px;
+}
+
+#authModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20000;
+  /* ABOVE infoOverlay */
+}
+
+#infoOverlay {
+  z-index: 10000;
+}
+
+#infoOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  pointer-events: none;
+  /* 🔥 THIS IS THE KEY */
+}
+
+.infoCard {
+  pointer-events: auto;
+}
+
+#infoOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+
+  /* 🔥 ALWAYS CLICKABLE */
+  pointer-events: auto;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.infoCard {
+  background: #111;
+  color: #fff;
+  max-width: 900px;
+  width: 90%;
+  border-radius: 12px;
+  padding: 20px;
+
+  /* 🔥 stop overlay click */
+  pointer-events: auto;
+}
+
+.closeDetails {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: white;
+  cursor: pointer;
+}
+
+.ottLink {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 8px 12px;
+  background: #ffcc00;
+  color: #000;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+iframe {
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.trailerBtn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: #ffcc00;
+  color: #000;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.ottTag {
+  display: inline-block;
+  background: #222;
+  padding: 4px 8px;
+  margin: 4px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* 👈 IMPORTANT */
+}
+
+.input {
+  max-width: 220px;
+  /* 👈 prevents pushing Sign In out */
+  width: 100%;
+}
+
+#authArea {
+  display: flex;
+  align-items: center;
+}
+
+#loginBtn {
+  display: inline-block;
+  /* 👈 force visibility */
+  white-space: nowrap;
+}
+
+.navBtn.active {
+  background: #f5c518;
+  color: black;
+}
+
+.loginPrompt {
+  text-align: center;
+  margin-top: 80px;
+  color: #ccc;
+}
+
+.loginPrompt h2 {
+  margin-bottom: 10px;
+}
+
+.loginLink {
+  color: #f5c518;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
+.loginPromptCard {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.loginLink {
+  color: #f5c518;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
+.infoCard.full {
+  display: flex;
+  gap: 30px;
+  max-width: 1000px;
+  width: 90%;
+  background: #0f0f0f;
+  padding: 30px;
+  border-radius: 12px;
+}
+
+.infoLeft img {
+  width: 300px;
+  border-radius: 10px;
+}
+
+.infoRight {
+  flex: 1;
+  color: #f11717;
+}
+
+.infoRight h1 {
+  margin-top: 0;
+}
+
+.overview {
+  line-height: 1.6;
+  margin: 15px 0;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.cta {
+  background: #f5c518;
+  color: #000;
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.muted {
+  color: #aaa;
+}
+
+/* ===== MOVIE DETAILS OVERLAY ===== */
+.detailsOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.detailsCard {
+  width: 90%;
+  max-width: 1000px;
+  background: #0f0f0f;
+  border-radius: 16px;
+  padding: 24px;
+  color: #fff;
+  position: relative;
+}
+
+.closeDetails {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.detailsContent {
+  display: flex;
+  gap: 24px;
+}
+
+.detailsPoster img {
+  width: 260px;
+  border-radius: 12px;
+}
+
+.detailsInfo h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.meta {
+  display: flex;
+  gap: 16px;
+  margin: 8px 0;
+  color: #bbb;
+}
+
+.genres {
+  margin: 10px 0;
+}
+
+.genre {
+  background: #222;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.overview {
+  margin: 14px 0;
+  line-height: 1.6;
+  color: #ddd;
+}
+
+.cast {
+  color: #ccc;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: #e50914;
+  color: #fff;
+}
+
+.btn.secondary {
+  background: #333;
+  color: #fff;
+  border: none;
+}
+
+.btn.ghost {
+  border: 1px solid #555;
+  color: #fff;
+}
+
+/* ===== PROFILE AVATAR ===== */
+#profileAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e50914;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* ===== PROFILE MENU ===== */
+#profileWrapper {
+  position: relative;
+}
+
+#profileMenu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px;
+  display: none;
+  min-width: 120px;
+  z-index: 1000;
+}
+
+#profileMenu button {
+  background: none;
+  border: none;
+  color: #fff;
+  width: 100%;
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+#profileMenu button:hover {
+  background: #222;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  transition: 0.3s;
+}
+
+.detailsOverlay iframe {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+}
