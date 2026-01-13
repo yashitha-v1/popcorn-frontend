@@ -1,9 +1,9 @@
 /* =====================================================
    CONFIG
 ===================================================== */
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://popcorn-backend-production.up.railway.app";
+const BACKEND = "https://popcorn-backend-production.up.railway.app";
 
-const BACKEND = "http://localhost:5000";
 const IMG = "https://image.tmdb.org/t/p/w500";
 
 
