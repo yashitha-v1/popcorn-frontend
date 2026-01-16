@@ -1,56 +1,15 @@
 /* =====================================================
-   CONFIG
+   AUTH STATE (LOCALSTORAGE – NETLIFY SAFE)
 ===================================================== */
+const IMG = "https://image.tmdb.org/t/p/w500";
+const BACKEND = "/.netlify/functions";
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-const authModal = document.getElementById("authModal");
-const loginBtn = document.getElementById("loginBtn");
-const profileWrapper = document.getElementById("profileWrapper");
-
-if (!currentUser) {
-  // show login button
-  loginBtn.style.display = "block";
-  profileWrapper.style.display = "none";
-} else {
-  // user is logged in
-  loginBtn.style.display = "none";
-  profileWrapper.style.display = "flex";
-}
-
-
-const IMG = "https://image.tmdb.org/t/p/w500";
-
-
-/* =====================================================
-   ELEMENTS
-===================================================== */
 const grid = document.querySelector(".grid");
-const trendingMovies = document.getElementById("trendingMovies");
-const trendingShows = document.getElementById("trendingShows");
-
-
-
-const trendingRow = document.getElementById("trendingRow");
-const continueRow = document.getElementById("continueRow");
-const recommendedRow = document.getElementById("recommendedRow");
-
-const searchBox = document.getElementById("searchBox");
-const genreFilter = document.getElementById("genreFilter");
-const ratingFilter = document.getElementById("ratingFilter");
-const languageFilter = document.getElementById("languageFilter");
-const moodFilter = document.getElementById("moodFilter");
-
-const navMovies = document.getElementById("navMovies");
-const navShows = document.getElementById("navShows");
-const navWatchlist = document.getElementById("navWatchlist");
 
 const loginBtn = document.getElementById("loginBtn");
 const profileWrapper = document.getElementById("profileWrapper");
 const profileAvatar = document.getElementById("profileAvatar");
-const profileMenu = document.getElementById("profileMenu");
-
-
 
 const authModal = document.getElementById("authModal");
 const closeAuth = document.getElementById("closeAuth");
@@ -62,7 +21,18 @@ const authSubmit = document.getElementById("authSubmit");
 const authToggle = document.getElementById("authToggle");
 const authMsg = document.getElementById("authMsg");
 
-const infoOverlay = document.getElementById("infoOverlay");
+let isSignup = false;
+
+// UI restore
+if (currentUser) {
+  loginBtn.style.display = "none";
+  profileWrapper.style.display = "flex";
+  profileAvatar.innerText = currentUser.name.charAt(0);
+} else {
+  loginBtn.style.display = "block";
+  profileWrapper.style.display = "none";
+}
+
 
 /* =====================================================
    STATE
@@ -71,21 +41,11 @@ let currentType = "movie";
 let page = 1;
 let loading = false;
 let inWatchlist = false;
-let isSignup = false;
-
-
-let watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
 
 /* =====================================================
    RESTORE LOGIN
 ===================================================== */
 
-
-if (currentUser) {
-  loginBtn.style.display = "none";
-  profileWrapper.style.display = "block";
-  profileAvatar.innerText = currentUser.name.charAt(0);
-}
 
 /* =====================================================
    SAFE FETCH
@@ -109,6 +69,9 @@ function normalizeResults(data) {
   return { results: [] };
 }
 
+const navMovies = document.getElementById("navMovies");
+const navShows = document.getElementById("navShows");
+const navWatchlist = document.getElementById("navWatchlist");
 
 /* =====================================================
    ACTIVE TAB
@@ -119,6 +82,8 @@ function setActiveTab(activeBtn) {
   );
   activeBtn.classList.add("active");
 }
+
+
 
 /* =====================================================
    INIT
@@ -556,93 +521,79 @@ async function openDetails(id, type = currentType) {
 
 
 }
+
 function showLoginPrompt() {
   grid.innerHTML = `
     <div class="watchlistPrompt">
       <h2>Please login to view your watchlist</h2>
-      <button id="loginFromWatchlist" class="cta">
-        Login
-      </button>
+      <button id="loginFromWatchlist" class="cta">Login</button>
     </div>
   `;
 
-  const btn = document.getElementById("loginFromWatchlist");
-  if (btn) {
-    btn.onclick = () => {
-      authModal.style.display = "flex";
-    };
-  }
+  document.getElementById("loginFromWatchlist").onclick = () => {
+    authModal.style.display = "flex";
+  };
 }
-
 
 /* =====================================================
    WATCHLIST
 ===================================================== */
-
-async function openWatchlist() {
-  setActiveTab(navWatchlist);
-
-  if (!currentUser || !currentUser.token) {
+function addToWatchlist(movie) {
+  if (!currentUser) {
     showLoginPrompt();
     return;
   }
 
-  inWatchlist = true;
+  let list = getUserWatchlist();
+
+  if (list.find(m => m.id === movie.id)) {
+    alert("Already in watchlist");
+    return;
+  }
+
+  list.push(movie);
+  saveUserWatchlist(list);
+
+  alert("Added to Watchlist ⭐");
+}
+
+
+function getUserWatchlist() {
+  if (!currentUser) return [];
+  return JSON.parse(
+    localStorage.getItem(`watchlist_${currentUser.email}`) || "[]"
+  );
+}
+
+function saveUserWatchlist(list) {
+  localStorage.setItem(
+    `watchlist_${currentUser.email}`,
+    JSON.stringify(list)
+  );
+}
+function openWatchlist() {
+  setActiveTab(navWatchlist);
+
+  if (!currentUser) {
+    showLoginPrompt();
+    return;
+  }
+
+  const list = getUserWatchlist();
   grid.innerHTML = "";
 
-  try {
-    const res = await fetch(`${API_BASE}/api/watchlist`, {
-      headers: {
-        Authorization: `Bearer ${currentUser.token}`
-      }
-    });
-
-    const watchlistIds = await res.json();
-
-    console.log("WATCHLIST IDS:", watchlistIds);
-
-    if (!Array.isArray(watchlistIds) || watchlistIds.length === 0) {
-      grid.innerHTML = `<h2 style="color:#aaa">Your watchlist is empty 🍿</h2>`;
-      return;
-    }
-
-    // 🔥 FORCE render each movie by fetching TMDB details
-    for (const id of watchlistIds) {
-      const data = await fetchJSON(
-        `${API_BASE}/api/movie/${id}?type=movie`
-      );
-
-      if (data && data.details) {
-        grid.appendChild(movieCard(data.details));
-      }
-    }
-
-  } catch (err) {
-    console.error("Watchlist render error:", err);
-    grid.innerHTML = `<h2 style="color:red">Failed to load watchlist</h2>`;
+  if (!list.length) {
+    grid.innerHTML = `<h2 style="color:#aaa">Your watchlist is empty 🍿</h2>`;
+    return;
   }
+
+  list.forEach(movie => {
+    grid.appendChild(movieCard(movie));
+  });
 }
 
 
 
-/* =====================================================
-   AUTH
-===================================================== */
-/* =====================================================
-   AUTH
-===================================================== */
-
-// Open / Close auth modal
-loginBtn.onclick = () => {
-  authModal.style.display = "flex";
-  authMsg.innerText = "";
-};
-
-closeAuth.onclick = () => {
-  authModal.style.display = "none";
-};
-
-// Toggle Login / Signup
 authToggle.onclick = () => {
   isSignup = !isSignup;
   authTitle.innerText = isSignup ? "Create Profile" : "Sign In";
@@ -650,12 +601,6 @@ authToggle.onclick = () => {
   authMsg.innerText = "";
 };
 
-// Email validation
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-}
-
-// Submit Login / Signup (LOCALSTORAGE ONLY)
 authSubmit.onclick = () => {
   authMsg.innerText = "";
 
@@ -663,18 +608,12 @@ authSubmit.onclick = () => {
   const password = authPassword.value.trim();
   const name = authName.value.trim();
 
-  // Validation
   if (!email || !password || (isSignup && !name)) {
     authMsg.innerText = "All fields are required";
     return;
   }
 
-  if (!isValidEmail(email)) {
-    authMsg.innerText = "Please enter a valid email address";
-    return;
-  }
-
-  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let users = JSON.parse(localStorage.getItem("users") || "[]");
 
   // SIGN UP
   if (isSignup) {
@@ -686,7 +625,7 @@ authSubmit.onclick = () => {
     users.push({ name, email, password });
     localStorage.setItem("users", JSON.stringify(users));
 
-    authMsg.innerText = "Signup successful! Please sign in.";
+    authMsg.innerText = "Signup successful! Please login.";
     isSignup = false;
     authTitle.innerText = "Sign In";
     authName.style.display = "none";
@@ -703,21 +642,17 @@ authSubmit.onclick = () => {
     return;
   }
 
-  // Save session
   currentUser = user;
   localStorage.setItem("currentUser", JSON.stringify(user));
 
-  // Update UI
   loginBtn.style.display = "none";
-  profileWrapper.style.display = "block";
+  profileWrapper.style.display = "flex";
   profileAvatar.innerText = user.name.charAt(0);
 
   authModal.style.display = "none";
 };
 
-/* =====================================================
-   LOGOUT (KEEP ONLY ONCE)
-===================================================== */
+
 
 
 /* =====================================================
@@ -731,37 +666,7 @@ function debounce(fn, delay) {
   };
 }
 
-async function addToWatchlist(movieId) {
-
-  try {
-    const res = await fetch(
-      `${API_BASE}/api/watchlist/${movieId}`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${currentUser.token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || data.error || "Failed to add to watchlist");
-      return;
-    }
-
-    alert("Added to Watchlist ⭐");
-
-  } catch (err) {
-    alert("Server error while adding to watchlist");
-  }
-}
-
-
 
 // expose functions for inline HTML usage
-window.addToWatchlist = addToWatchlist;
 window.openWatchlist = openWatchlist;
 
