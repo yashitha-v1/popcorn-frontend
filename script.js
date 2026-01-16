@@ -622,82 +622,89 @@ if (authSubmit) {
 /* =====================================================
    AUTH (LOCALSTORAGE ONLY – NETLIFY SAFE)
 ===================================================== */
-function updateAuthUI() {
-  if (currentUser) {
-    loginBtn.style.display = "none";
-    profileWrapper.style.display = "flex";
-    profileAvatar.innerText = currentUser.name.charAt(0);
-  } else {
-    loginBtn.style.display = "block";
-    profileWrapper.style.display = "none";
-  }
-}
+document.addEventListener("DOMContentLoaded", () => {
 
-updateAuthUI();
-
-// Open auth modal
-loginBtn.onclick = () => {
-  authModal.style.display = "flex";
-  authMsg.innerText = "";
-};
-
-// Close modal
-closeAuth.onclick = () => {
-  authModal.style.display = "none";
-};
-
-// Toggle login / signup
-authToggle.onclick = () => {
-  isSignup = !isSignup;
-  authTitle.innerText = isSignup ? "Create Account" : "Sign In";
-  authName.style.display = isSignup ? "block" : "none";
-  authMsg.innerText = "";
-};
-
-// Submit auth
-authSubmit.onclick = () => {
-  const email = authEmail.value.trim();
-  const password = authPassword.value.trim();
-  const name = authName.value.trim();
-
-  if (!email || !password || (isSignup && !name)) {
-    authMsg.innerText = "All fields required";
-    return;
+  function updateAuthUI() {
+    if (currentUser) {
+      loginBtn.style.display = "none";
+      profileWrapper.style.display = "flex";
+      profileAvatar.innerText = currentUser.name.charAt(0);
+    } else {
+      loginBtn.style.display = "block";
+      profileWrapper.style.display = "none";
+    }
   }
 
-  let users = JSON.parse(localStorage.getItem("users")) || [];
+  updateAuthUI();
 
-  if (isSignup) {
-    if (users.find(u => u.email === email)) {
-      authMsg.innerText = "User already exists";
+  // Open auth modal
+  loginBtn.onclick = () => {
+    authModal.style.display = "flex";
+    authMsg.innerText = "";
+  };
+
+  // Close modal
+  closeAuth.onclick = () => {
+    authModal.style.display = "none";
+  };
+
+  // Toggle login / signup
+  authToggle.onclick = () => {
+    isSignup = !isSignup;
+    authTitle.innerText = isSignup ? "Create Account" : "Sign In";
+    authName.style.display = isSignup ? "block" : "none";
+    authMsg.innerText = "";
+  };
+
+  // Submit auth
+  authSubmit.onclick = () => {
+    const email = authEmail.value.trim();
+    const password = authPassword.value.trim();
+    const name = authName.value.trim();
+
+    if (!email || !password || (isSignup && !name)) {
+      authMsg.innerText = "All fields required";
       return;
     }
 
-    users.push({ name, email, password });
-    localStorage.setItem("users", JSON.stringify(users));
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
 
-    authMsg.innerText = "Signup successful. Please login.";
-    isSignup = false;
-    authTitle.innerText = "Sign In";
-    authName.style.display = "none";
-    return;
-  }
+    // SIGN UP
+    if (isSignup) {
+      if (users.find(u => u.email === email)) {
+        authMsg.innerText = "User already exists";
+        return;
+      }
 
-  const user = users.find(
-    u => u.email === email && u.password === password
-  );
+      users.push({ name, email, password });
+      localStorage.setItem("users", JSON.stringify(users));
 
-  if (!user) {
-    authMsg.innerText = "Invalid email or password";
-    return;
-  }
+      authMsg.innerText = "Signup successful. Please login.";
+      isSignup = false;
+      authTitle.innerText = "Sign In";
+      authName.style.display = "none";
+      return;
+    }
 
-  currentUser = user;
-  localStorage.setItem("currentUser", JSON.stringify(user));
+    // LOGIN
+    const user = users.find(
+      u => u.email === email && u.password === password
+    );
 
-  authModal.style.display = "none";
-  updateAuthUI();
-};
+    if (!user) {
+      authMsg.innerText = "Invalid email or password";
+      return;
+    }
+
+    currentUser = user;
+    localStorage.setItem("currentUser", JSON.stringify(user));
+
+    authModal.style.display = "none";
+    updateAuthUI();
+  };
+
+});
+
 
 
 function debounce(fn, delay) {
@@ -713,6 +720,7 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
+
 
 
 
