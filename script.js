@@ -313,8 +313,12 @@ async function loadBrowse() {
   }
 
   data.results.forEach(movie => {
-    grid.appendChild(movieCard(movie));
+    // ✅ show only watchlisted movies
+    if (currentUser && isInWatchlist(movie.id)) {
+      grid.appendChild(movieCard(movie));
+    }
   });
+
 
   loading = false;
 }
@@ -532,6 +536,15 @@ function openWatchlist() {
     const card = movieCard(movie);
     if (card) grid.appendChild(card);
   });
+}
+function isInWatchlist(movieId) {
+  if (!currentUser) return false;
+
+  const list = JSON.parse(
+    localStorage.getItem(`watchlist_${currentUser.email}`) || "[]"
+  );
+
+  return list.some(m => m.id === movieId);
 }
 
 /* =====================================================
