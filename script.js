@@ -284,13 +284,18 @@ async function loadBrowse() {
     isSearchMode = false;
     url = `${TMDB_BASE}/discover/${currentType}?api_key=${TMDB_KEY}&page=${page}`;
 
-    if (languageFilter.value) {
-      url += `&with_original_language=${languageFilter.value}`;
-    }
+ if (languageFilter.value) {
+  url += `&with_original_language=${languageFilter.value}`;
+}
 
-    if (ratingFilter.value) {
-      url += `&vote_average.gte=${ratingFilter.value}`;
-    }
+if (ratingFilter.value) {
+  url += `&vote_average.gte=${ratingFilter.value}`;
+}
+
+if (genreFilter.value) {
+  url += `&with_genres=${genreFilter.value}`;
+}
+
 
     const moodMap = {
       happy: "35",
@@ -705,6 +710,7 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
+
 
 
 
