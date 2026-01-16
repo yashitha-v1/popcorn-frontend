@@ -1,8 +1,9 @@
+
 /* =====================================================
    AUTH STATE (LOCALSTORAGE – NETLIFY SAFE)
 ===================================================== */
 
-let searchBox - null;
+let searchBox = null;
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_KEY = "8dd19f897799957dab98b123ccd611d2";
@@ -298,6 +299,13 @@ async function loadBrowse() {
 
     if (ratingFilter.value) {
       url += `&vote_average.gte=${ratingFilter.value}`;
+    }
+    if (genreFilter) {
+      genreFilter.addEventListener("change", resetBrowse);
+    }
+
+    if (moodFilter) {
+      moodFilter.addEventListener("change", resetBrowse);
     }
 
     const moodMap = {
@@ -623,7 +631,7 @@ if (authSubmit) {
    AUTH (LOCALSTORAGE ONLY – NETLIFY SAFE)
 ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-   searchBox = document.getElementById("searchBox");
+  searchBox = document.getElementById("searchBox");
   if (searchBtn) {
     searchBtn.addEventListener("click", () => {
       page = 1;
@@ -772,5 +780,4 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
-
 
