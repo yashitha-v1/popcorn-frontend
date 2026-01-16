@@ -722,31 +722,32 @@ function debounce(fn, delay) {
   };
 }
 
-async function addToWatchlist(movieId)
+async function addToWatchlist(movieId) {
 
-try {
-  const res = await fetch(
-    `${API_BASE}/api/watchlist/${movieId}`,
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${currentUser.token}`,
-        "Content-Type": "application/json"
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/watchlist/${movieId}`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${currentUser.token}`,
+          "Content-Type": "application/json"
+        }
       }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || data.error || "Failed to add to watchlist");
+      return;
     }
-  );
 
-  const data = await res.json();
+    alert("Added to Watchlist ⭐");
 
-  if (!res.ok) {
-    alert(data.message || data.error || "Failed to add to watchlist");
-    return;
+  } catch (err) {
+    alert("Server error while adding to watchlist");
   }
-
-  alert("Added to Watchlist ⭐");
-
-} catch (err) {
-  alert("Server error while adding to watchlist");
 }
 
 
