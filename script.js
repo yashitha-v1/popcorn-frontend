@@ -1,9 +1,13 @@
 /* =====================================================
    AUTH STATE (LOCALSTORAGE – NETLIFY SAFE)
 ===================================================== */
+
+let searchBox;
+
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_KEY = "8dd19f897799957dab98b123ccd611d2";
 const IMG = "https://image.tmdb.org/t/p/w500";
+
 
 
 
@@ -25,6 +29,8 @@ const authSubmit = document.getElementById("authSubmit");
 const authToggle = document.getElementById("authToggle");
 const authMsg = document.getElementById("authMsg");
 
+const profileMenu = document.getElementById("profileMenu");
+const logoutBtn = document.getElementById("logoutBtn");
 let isSignup = false;
 
 // UI restore
@@ -271,11 +277,13 @@ async function loadRow(row, endpoint) {
 
 /* ---------- Browse + Infinite Scroll ---------- */
 async function loadBrowse() {
+  if (!searchBox) return;
+
+  const query = searchBox.value.trim();
   if (loading || inWatchlist) return;
   loading = true;
 
   let url;
-  const query = searchBox.value.trim();
 
   if (query) {
     isSearchMode = true;
@@ -284,21 +292,13 @@ async function loadBrowse() {
     isSearchMode = false;
     url = `${TMDB_BASE}/discover/${currentType}?api_key=${TMDB_KEY}&page=${page}`;
 
- if (languageFilter.value) {
-  url += `&with_original_language=${languageFilter.value}`;
-}
+    if (languageFilter.value) {
+      url += `&with_original_language=${languageFilter.value}`;
+    }
 
-if (ratingFilter.value) {
-  url += `&vote_average.gte=${ratingFilter.value}`;
-}
-
-if (genreFilter.value) {
-  url += `&with_genres=${genreFilter.value}`;
-}
-     if (moodFilter.value && moodMap[moodFilter.value]) {
-  url += `&with_genres=${moodMap[moodFilter.value]}`;
-}
-
+    if (ratingFilter.value) {
+      url += `&vote_average.gte=${ratingFilter.value}`;
+    }
 
     const moodMap = {
       happy: "35",
@@ -322,7 +322,7 @@ if (genreFilter.value) {
 
   data.results.forEach(movie => {
     // ✅ show only watchlisted movies
-  grid.appendChild(movieCard(movie));
+    grid.appendChild(movieCard(movie));
 
   });
 
@@ -748,8 +748,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-
 function debounce(fn, delay) {
   let timer;
   return function (...args) {
@@ -763,10 +761,4 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
-
-
-
-
-
-
 
