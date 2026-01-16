@@ -314,9 +314,8 @@ async function loadBrowse() {
 
   data.results.forEach(movie => {
     // ✅ show only watchlisted movies
-    if (currentUser && isInWatchlist(movie.id)) {
-      grid.appendChild(movieCard(movie));
-    }
+  grid.appendChild(movieCard(movie));
+
   });
 
 
@@ -706,5 +705,6 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
+
 
 
