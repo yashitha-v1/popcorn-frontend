@@ -1,8 +1,7 @@
 /* =====================================================
    CONFIG
 ===================================================== */
-
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
 if (!currentUser) {
   window.location.href = "login.html";
@@ -38,7 +37,6 @@ const navShows = document.getElementById("navShows");
 const navWatchlist = document.getElementById("navWatchlist");
 
 const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 const profileWrapper = document.getElementById("profileWrapper");
 const profileAvatar = document.getElementById("profileAvatar");
 const profileMenu = document.getElementById("profileMenu");
@@ -621,11 +619,19 @@ async function openWatchlist() {
 /* =====================================================
    AUTH
 ===================================================== */
-/* ================= AUTH ================= */
+/* =====================================================
+   AUTH
+===================================================== */
 
 // Open / Close auth modal
-loginBtn.onclick = () => authModal.style.display = "flex";
-closeAuth.onclick = () => authModal.style.display = "none";
+loginBtn.onclick = () => {
+  authModal.style.display = "flex";
+  authMsg.innerText = "";
+};
+
+closeAuth.onclick = () => {
+  authModal.style.display = "none";
+};
 
 // Toggle Login / Signup
 authToggle.onclick = () => {
@@ -640,14 +646,15 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-// Submit Login / Signup
-authSubmit.onclick = async () => {
+// Submit Login / Signup (LOCALSTORAGE ONLY)
+authSubmit.onclick = () => {
   authMsg.innerText = "";
 
   const email = authEmail.value.trim();
   const password = authPassword.value.trim();
   const name = authName.value.trim();
 
+  // Validation
   if (!email || !password || (isSignup && !name)) {
     authMsg.innerText = "All fields are required";
     return;
@@ -658,69 +665,50 @@ authSubmit.onclick = async () => {
     return;
   }
 
-  const endpoint = isSignup ? "/api/auth/signup" : "/api/auth/login";
+  let users = JSON.parse(localStorage.getItem("users")) || [];
 
-  try {
-    const res = await fetch(BACKEND + endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      authMsg.innerText = data.error || "Authentication failed";
+  // SIGN UP
+  if (isSignup) {
+    if (users.find(u => u.email === email)) {
+      authMsg.innerText = "User already exists";
       return;
     }
 
-    // Save user
-    currentUser = {
-      name: data.user.name,
-      token: data.token
-    };
+    users.push({ name, email, password });
+    localStorage.setItem("users", JSON.stringify(users));
 
-    localStorage.setItem("currentUser", JSON.stringify(currentUser));
-
-    // Show avatar
-    loginBtn.style.display = "none";
-    profileWrapper.style.display = "block";
-    profileAvatar.innerText = currentUser.name.charAt(0);
-
-    authModal.style.display = "none";
-
-  } catch (err) {
-    authMsg.innerText = "Server error. Try again.";
+    authMsg.innerText = "Signup successful! Please sign in.";
+    isSignup = false;
+    authTitle.innerText = "Sign In";
+    authName.style.display = "none";
+    return;
   }
-};
 
-/* ================= PROFILE MENU ================= */
+  // LOGIN
+  const user = users.find(
+    u => u.email === email && u.password === password
+  );
 
-// Restore login on refresh
-if (currentUser) {
+  if (!user) {
+    authMsg.innerText = "Invalid email or password";
+    return;
+  }
+
+  // Save session
+  currentUser = user;
+  localStorage.setItem("currentUser", JSON.stringify(user));
+
+  // Update UI
   loginBtn.style.display = "none";
   profileWrapper.style.display = "block";
-  profileAvatar.innerText = currentUser.name.charAt(0);
-}
+  profileAvatar.innerText = user.name.charAt(0);
 
-// Toggle profile menu
-profileAvatar.onclick = (e) => {
-  e.stopPropagation();
-  profileMenu.style.display =
-    profileMenu.style.display === "block" ? "none" : "block";
+  authModal.style.display = "none";
 };
 
-// Logout
-logoutBtn.onclick = () => {
-  localStorage.clear();
-  location.reload();
-};
-
-// Close menu on outside click
-document.addEventListener("click", () => {
-  profileMenu.style.display = "none";
-});
-
+/* =====================================================
+   LOGOUT (KEEP ONLY ONCE)
+===================================================== */
 
 
 /* =====================================================
@@ -734,44 +722,31 @@ function debounce(fn, delay) {
   };
 }
 
-async function addToWatchlist(movieId) {
-  if (!currentUser || !currentUser.token) {
-    authModal.style.display = "flex";
+async function addToWatchlist(movieId)
+
+try {
+  const res = await fetch(
+    `${API_BASE}/api/watchlist/${movieId}`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${currentUser.token}`,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.message || data.error || "Failed to add to watchlist");
     return;
   }
 
-  try {
-    const res = await fetch(
-      `${API_BASE}/api/watchlist/${movieId}`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${currentUser.token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+  alert("Added to Watchlist ⭐");
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || data.error || "Failed to add to watchlist");
-      return;
-    }
-
-    alert("Added to Watchlist ⭐");
-
-  } catch (err) {
-    alert("Server error while adding to watchlist");
-  }
-}
-const logoutBtn = document.getElementById("logoutBtn");
-
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("currentUser");
-    window.location.href = "login.html";
-  });
+} catch (err) {
+  alert("Server error while adding to watchlist");
 }
 
 
