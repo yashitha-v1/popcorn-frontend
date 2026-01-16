@@ -1,14 +1,23 @@
 /* =====================================================
    CONFIG
 ===================================================== */
+
 let currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
+const authModal = document.getElementById("authModal");
+const loginBtn = document.getElementById("loginBtn");
+const profileWrapper = document.getElementById("profileWrapper");
+
 if (!currentUser) {
-  window.location.href = "login.html";
+  // show login button
+  loginBtn.style.display = "block";
+  profileWrapper.style.display = "none";
+} else {
+  // user is logged in
+  loginBtn.style.display = "none";
+  profileWrapper.style.display = "flex";
 }
 
-const API_BASE = "https://popcorn-backend-production.up.railway.app";
-const BACKEND = "https://popcorn-backend-production.up.railway.app";
 
 const IMG = "https://image.tmdb.org/t/p/w500";
 
@@ -755,3 +764,4 @@ async function addToWatchlist(movieId) {
 // expose functions for inline HTML usage
 window.addToWatchlist = addToWatchlist;
 window.openWatchlist = openWatchlist;
+
