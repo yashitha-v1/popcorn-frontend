@@ -278,35 +278,36 @@ async function loadRow(row, endpoint) {
 
 /* ---------- Browse + Infinite Scroll ---------- */
 async function loadBrowse() {
-  if (!searchBox) return;
-
-  const query = searchBox.value.trim();
+  // prevent double load or watchlist override
   if (loading || inWatchlist) return;
+  if (!grid) return;
+
   loading = true;
+
+  // ✅ define query ONCE, safely
+  const query = searchBox ? searchBox.value.trim() : "";
 
   let url;
 
   if (query) {
-    isSearchMode = true;
+    // SEARCH MODE
     url = `${TMDB_BASE}/search/${currentType}?api_key=${TMDB_KEY}&query=${encodeURIComponent(query)}&page=${page}`;
   } else {
-    isSearchMode = false;
+    // BROWSE MODE
     url = `${TMDB_BASE}/discover/${currentType}?api_key=${TMDB_KEY}&page=${page}`;
 
-    if (languageFilter.value) {
+    if (languageFilter && languageFilter.value) {
       url += `&with_original_language=${languageFilter.value}`;
     }
 
-    if (ratingFilter.value) {
+    if (ratingFilter && ratingFilter.value) {
       url += `&vote_average.gte=${ratingFilter.value}`;
     }
+
     if (genreFilter && genreFilter.value) {
       url += `&with_genres=${genreFilter.value}`;
     }
 
-
-
-    // ✅ MOOD FILTER
     const moodMap = {
       happy: "35",
       romantic: "10749",
@@ -319,31 +320,22 @@ async function loadBrowse() {
     }
   }
 
+  // fetch data
   const raw = await fetchJSON(url);
   const data = normalizeResults(raw);
 
-  if (data.results.length === 0) {
+  if (!data.results.length) {
     loading = false;
     return;
   }
 
+  // render movies
   data.results.forEach(movie => {
-    // ✅ show only watchlisted movies
     grid.appendChild(movieCard(movie));
-
   });
-
 
   loading = false;
 }
-window.addEventListener("scroll", () => {
-  if (loading || inWatchlist) return;
-
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-    page++;
-    loadBrowse();
-  }
-});
 
 
 /* =====================================================
@@ -630,12 +622,16 @@ if (authSubmit) {
    AUTH (LOCALSTORAGE ONLY – NETLIFY SAFE)
 ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-
   /* =====================
-     SEARCH ELEMENTS
+     SEARCH INIT
   ====================== */
-  const searchBox = document.getElementById("searchBox");
   const searchBtn = document.getElementById("searchBtn");
+
+  searchBox = document.getElementById("searchBox");
+
+  if (searchBox) {
+    searchBox.addEventListener("input", debounce(resetBrowse, 400));
+  }
 
   if (searchBtn) {
     searchBtn.addEventListener("click", () => {
@@ -648,30 +644,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =====================
-     AUTH ELEMENTS
+     AUTH STATE (USE GLOBAL currentUser)
   ====================== */
-  const loginBtn = document.getElementById("loginBtn");
-  const profileWrapper = document.getElementById("profileWrapper");
-  const profileAvatar = document.getElementById("profileAvatar");
-  const profileMenu = document.getElementById("profileMenu");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  const authModal = document.getElementById("authModal");
-  const closeAuth = document.getElementById("closeAuth");
-  const authTitle = document.getElementById("authTitle");
-  const authName = document.getElementById("authName");
-  const authEmail = document.getElementById("authEmail");
-  const authPassword = document.getElementById("authPassword");
-  const authSubmit = document.getElementById("authSubmit");
-  const authToggle = document.getElementById("authToggle");
-  const authMsg = document.getElementById("authMsg");
-
   let isSignup = false;
-  let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-  /* =====================
-     UPDATE UI
-  ====================== */
   function updateAuthUI() {
     if (currentUser) {
       loginBtn.style.display = "none";
@@ -688,29 +665,29 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =====================
      OPEN / CLOSE MODAL
   ====================== */
-  loginBtn.addEventListener("click", () => {
+  loginBtn.onclick = () => {
     authModal.style.display = "flex";
     authMsg.innerText = "";
-  });
+  };
 
-  closeAuth.addEventListener("click", () => {
+  closeAuth.onclick = () => {
     authModal.style.display = "none";
-  });
+  };
 
   /* =====================
      TOGGLE LOGIN / SIGNUP
   ====================== */
-  authToggle.addEventListener("click", () => {
+  authToggle.onclick = () => {
     isSignup = !isSignup;
     authTitle.innerText = isSignup ? "Create Account" : "Sign In";
     authName.style.display = isSignup ? "block" : "none";
     authMsg.innerText = "";
-  });
+  };
 
   /* =====================
      SUBMIT AUTH
   ====================== */
-  authSubmit.addEventListener("click", () => {
+  authSubmit.onclick = () => {
     const email = authEmail.value.trim();
     const password = authPassword.value.trim();
     const name = authName.value.trim();
@@ -754,23 +731,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     authModal.style.display = "none";
     updateAuthUI();
-  });
+  };
 
   /* =====================
      AVATAR / LOGOUT
   ====================== */
-  profileAvatar.addEventListener("click", (e) => {
+  profileAvatar.onclick = (e) => {
     e.stopPropagation();
     profileMenu.style.display =
       profileMenu.style.display === "block" ? "none" : "block";
-  });
+  };
 
-  logoutBtn.addEventListener("click", (e) => {
+  logoutBtn.onclick = (e) => {
     e.stopPropagation();
     localStorage.removeItem("currentUser");
     currentUser = null;
     updateAuthUI();
-  });
+  };
 
   document.addEventListener("click", () => {
     profileMenu.style.display = "none";
@@ -797,5 +774,4 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
-
 
