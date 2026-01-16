@@ -3,7 +3,7 @@
 ===================================================== */
 const IMG = "https://image.tmdb.org/t/p/w500";
 const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_KEY = 8dd19f897799957dab98b123ccd611d2 
+const TMDB_KEY = "8dd19f897799957dab98b123ccd611d2";
 
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -671,5 +671,6 @@ function debounce(fn, delay) {
 
 // expose functions for inline HTML usage
 window.openWatchlist = openWatchlist;
+
 
 
