@@ -2,7 +2,9 @@
    AUTH STATE (LOCALSTORAGE – NETLIFY SAFE)
 ===================================================== */
 const IMG = "https://image.tmdb.org/t/p/w500";
-const BACKEND = "/.netlify/functions";
+const TMDB_BASE = "https://api.themoviedb.org/3";
+const TMDB_KEY = 8dd19f897799957dab98b123ccd611d2 
+
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser"));
 const grid = document.querySelector(".grid");
@@ -669,4 +671,5 @@ function debounce(fn, delay) {
 
 // expose functions for inline HTML usage
 window.openWatchlist = openWatchlist;
+
 
