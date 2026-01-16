@@ -300,14 +300,13 @@ async function loadBrowse() {
     if (ratingFilter.value) {
       url += `&vote_average.gte=${ratingFilter.value}`;
     }
-    if (genreFilter) {
-      genreFilter.addEventListener("change", resetBrowse);
+    if (genreFilter && genreFilter.value) {
+      url += `&with_genres=${genreFilter.value}`;
     }
 
-    if (moodFilter) {
-      moodFilter.addEventListener("change", resetBrowse);
-    }
 
+
+    // ✅ MOOD FILTER
     const moodMap = {
       happy: "35",
       romantic: "10749",
@@ -315,7 +314,7 @@ async function loadBrowse() {
       action: "28"
     };
 
-    if (moodFilter.value && moodMap[moodFilter.value]) {
+    if (moodFilter && moodFilter.value && moodMap[moodFilter.value]) {
       url += `&with_genres=${moodMap[moodFilter.value]}`;
     }
   }
