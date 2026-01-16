@@ -1,9 +1,11 @@
 /* =====================================================
    AUTH STATE (LOCALSTORAGE – NETLIFY SAFE)
 ===================================================== */
-const IMG = "https://image.tmdb.org/t/p/w500";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_KEY = "8dd19f897799957dab98b123ccd611d2";
+const IMG = "https://image.tmdb.org/t/p/w500";
+
+
 
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -48,7 +50,6 @@ let inWatchlist = false;
    RESTORE LOGIN
 ===================================================== */
 
-
 /* =====================================================
    SAFE FETCH
 ===================================================== */
@@ -61,6 +62,7 @@ async function fetchJSON(url, fallback = []) {
     return fallback;
   }
 }
+
 function normalizeResults(data) {
   if (Array.isArray(data)) {
     return { results: data };
@@ -71,6 +73,9 @@ function normalizeResults(data) {
   return { results: [] };
 }
 
+/* =====================================================
+   NAV ELEMENTS
+===================================================== */
 const navMovies = document.getElementById("navMovies");
 const navShows = document.getElementById("navShows");
 const navWatchlist = document.getElementById("navWatchlist");
@@ -79,68 +84,80 @@ const navWatchlist = document.getElementById("navWatchlist");
    ACTIVE TAB
 ===================================================== */
 function setActiveTab(activeBtn) {
-  [navMovies, navShows, navWatchlist].forEach(btn =>
-    btn.classList.remove("active")
-  );
+  if (!activeBtn) return;
+
+  [navMovies, navShows, navWatchlist].forEach(btn => {
+    if (btn) btn.classList.remove("active");
+  });
+
   activeBtn.classList.add("active");
 }
 
-
-
 /* =====================================================
-   INIT
+   INIT (SAFE)
 ===================================================== */
-setActiveTab(navMovies);
-loadHome();
-loadContinueWatching();
-loadRecommended();
-loadBrowse();
+if (navMovies) {
+  setActiveTab(navMovies);
+}
+
+if (typeof loadHome === "function") loadHome();
+if (typeof loadContinueWatching === "function") loadContinueWatching();
+if (typeof loadRecommended === "function") loadRecommended();
+if (typeof loadBrowse === "function") loadBrowse();
 
 
 /* =====================================================
    NAVIGATION
 ===================================================== */
-navMovies.onclick = () => {
-  inWatchlist = false;
-  setActiveTab(navMovies);
-  switchType("movie");
-};
+/* =====================================================
+   NAVIGATION
+===================================================== */
+if (navMovies) {
+  navMovies.onclick = () => {
+    inWatchlist = false;
+    setActiveTab(navMovies);
+    switchType("movie");
+  };
+}
 
-navShows.onclick = () => {
-  inWatchlist = false;
-  setActiveTab(navShows);
-  switchType("tv");
-};
+if (navShows) {
+  navShows.onclick = () => {
+    inWatchlist = false;
+    setActiveTab(navShows);
+    switchType("tv");
+  };
+}
 
-navWatchlist.onclick = () => {
-  openWatchlist();
-};
+if (navWatchlist) {
+  navWatchlist.onclick = () => {
+    openWatchlist();
+  };
+}
 
 function switchType(type) {
   currentType = type;
   inWatchlist = false;
   page = 1;
-  grid.innerHTML = "";
-  loadHome();
-  loadContinueWatching();
-  loadRecommended();
-  loadBrowse();
 
+  if (grid) grid.innerHTML = "";
+
+  if (typeof loadHome === "function") loadHome();
+  if (typeof loadContinueWatching === "function") loadContinueWatching();
+  if (typeof loadRecommended === "function") loadRecommended();
+  if (typeof loadBrowse === "function") loadBrowse();
 }
+
 /* =====================================================
    HOME SECTIONS
 ===================================================== */
-
 /* ---------- Continue Watching (no login required) ---------- */
 function saveContinueWatching(movie, type) {
   if (!movie || !movie.id) return;
 
   let list = JSON.parse(localStorage.getItem("continueWatching") || "[]");
 
-  // remove duplicate
   list = list.filter(m => m.id !== movie.id);
 
-  // add to top
   list.unshift({
     id: movie.id,
     title: movie.title || movie.name,
@@ -149,7 +166,6 @@ function saveContinueWatching(movie, type) {
     genre_ids: movie.genre_ids || []
   });
 
-  // keep only 10
   localStorage.setItem(
     "continueWatching",
     JSON.stringify(list.slice(0, 10))
@@ -158,19 +174,14 @@ function saveContinueWatching(movie, type) {
 
 /* ---------- Load Home ---------- */
 async function loadHome() {
-  // SAFETY: ensure elements exist
-  if (!trendingMovies || !trendingShows) {
-    console.error("Trending containers missing");
-    return;
-  }
+  if (!trendingMovies || !trendingShows) return;
 
-  // Show sections
   trendingMovies.style.display = "none";
   trendingShows.style.display = "none";
-  continueRow.style.display = "flex";
-  recommendedRow.style.display = "flex";
 
-  // LOAD TRENDING (Netflix style)
+  if (continueRow) continueRow.style.display = "flex";
+  if (recommendedRow) recommendedRow.style.display = "flex";
+
   if (currentType === "movie") {
     trendingMovies.style.display = "flex";
     loadRow(trendingMovies, "/api/trending?type=movie");
@@ -180,47 +191,25 @@ async function loadHome() {
   }
 }
 
-
-// ----- CONTINUE WATCHING -----
-if (continueRow) {
-  continueRow.style.display = "flex";
-  loadContinueWatching();
-}
-
-// ----- RECOMMENDED -----
-if (recommendedRow) {
-  recommendedRow.style.display = "flex";
-  loadRecommended();
-}
-
-// ----- HIDE OLD TRENDING ROW (IF EXISTS) -----
-if (typeof trendingRow !== "undefined" && trendingRow) {
-  trendingRow.style.display = "none";
-}
-
-
-
-// Continue Watching (localStorage based)
+/* ---------- Continue Watching ---------- */
 function loadContinueWatching() {
+  if (!continueRow) return;
+
   const list = JSON.parse(localStorage.getItem("continueWatching") || "[]");
   continueRow.innerHTML = "";
 
-  const filtered = list.filter(
-    item => item._type === currentType
-  );
-
+  const filtered = list.filter(item => item._type === currentType);
   if (!filtered.length) return;
 
   filtered.forEach(item => {
     const card = movieCard(item);
-    if (card instanceof Node) {
-      continueRow.appendChild(card);
-    }
+    if (card) continueRow.appendChild(card);
   });
 }
+
+/* ---------- Genre Helper ---------- */
 function getTopGenres() {
   const list = JSON.parse(localStorage.getItem("continueWatching") || "[]");
-
   const genreCount = {};
 
   list
@@ -237,13 +226,13 @@ function getTopGenres() {
     .map(([id]) => id);
 }
 
-
-
-// Recommended (works with or without login)
+/* ---------- Recommended ---------- */
 async function loadRecommended() {
-  const genres = getTopGenres();
+  if (!recommendedRow) return;
 
-  let url = `${BACKEND}/api/movies?type=${currentType}&page=1`;
+  const genres = getTopGenres();
+  let url = `${TMDB_BASE}/discover/${currentType}?api_key=${TMDB_KEY}&page=1`
+
 
   if (genres.length) {
     url += `&genre=${genres.join(",")}`;
@@ -253,278 +242,218 @@ async function loadRecommended() {
   const data = normalizeResults(raw);
 
   recommendedRow.innerHTML = "";
-
   if (!data.results.length) return;
 
   data.results.slice(0, 10).forEach(movie => {
     const card = movieCard(movie);
-    if (card instanceof Node) {
-      recommendedRow.appendChild(card);
-    }
+    if (card) recommendedRow.appendChild(card);
   });
 }
 
-
-/* ---------- Load Continue Watching ---------- */
-function loadContinueWatching() {
-  const list = JSON.parse(localStorage.getItem("continueWatching") || "[]");
-  continueRow.innerHTML = "";
-
-  if (!list.length) return;
-
-  list.forEach(item => {
-    const card = movieCard({
-      id: item.id,
-      title: item.title,
-      poster_path: item.poster_path,
-      _type: item._type
-    });
-
-    if (card instanceof Node) {
-      continueRow.appendChild(card);
-    }
-  });
-}
-function getTopGenres() {
-  const list = JSON.parse(localStorage.getItem("continueWatching") || "[]");
-
-  const genreCount = {};
-
-  list
-    .filter(item => item._type === currentType)
-    .forEach(item => {
-      (item.genre_ids || []).forEach(g => {
-        genreCount[g] = (genreCount[g] || 0) + 1;
-      });
-    });
-
-  return Object.entries(genreCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 2)
-    .map(([id]) => id);
-}
-
-/* ---------- Recommended (everyone) ---------- */
-async function loadRecommended() {
-  const genres = getTopGenres();
-
-  let url = `${BACKEND}/api/movies?type=${currentType}&page=1`;
-
-  if (genres.length) {
-    url += `&genre=${genres.join(",")}`;
-  }
-
-  const raw = await fetchJSON(url);
-  const data = normalizeResults(raw);
-
-  recommendedRow.innerHTML = "";
-
-  if (!data.results.length) return;
-
-  data.results.slice(0, 10).forEach(movie => {
-    const card = movieCard(movie);
-    if (card instanceof Node) {
-      recommendedRow.appendChild(card);
-    }
-  });
-}
-
-
-/* ---------- Generic Row Loader (existing) ---------- */
+/* ---------- Generic Row Loader ---------- */
 async function loadRow(row, endpoint) {
   if (!row) return;
 
-  const raw = await fetchJSON(BACKEND + endpoint);
+  const raw = await fetchJSON(
+    `${TMDB_BASE}/trending/${currentType}/day?api_key=${TMDB_KEY}`
+  )
+
   const data = normalizeResults(raw);
 
   row.innerHTML = "";
-
-  if (!data.results.length) {
-    console.warn("No trending data:", endpoint);
-    return;
-  }
+  if (!data.results.length) return;
 
   data.results.slice(0, 10).forEach(item => {
     const card = movieCard(item);
-    row.appendChild(card);
+    if (card) row.appendChild(card);
   });
 }
 
-/* =====================================================
-   BROWSE + INFINITE SCROLL
-===================================================== */
+/* ---------- Browse + Infinite Scroll ---------- */
 async function loadBrowse() {
   if (loading || inWatchlist) return;
   loading = true;
 
-  const url =
-    `${BACKEND}/api/movies?type=${currentType}` +
-    `&page=${page}` +
-    `&search=${searchBox.value}` +
-    `&genre=${genreFilter.value}` +
-    `&rating=${ratingFilter.value}` +
-    `&language=${languageFilter.value}` +
-    `&mood=${moodFilter.value}`;
+  let url;
+  const query = searchBox.value.trim();
+
+  if (query) {
+    isSearchMode = true;
+    url = `${TMDB_BASE}/search/${currentType}?api_key=${TMDB_KEY}&query=${encodeURIComponent(query)}&page=${page}`;
+  } else {
+    isSearchMode = false;
+    url = `${TMDB_BASE}/discover/${currentType}?api_key=${TMDB_KEY}&page=${page}`;
+
+    if (languageFilter.value) {
+      url += `&with_original_language=${languageFilter.value}`;
+    }
+
+    if (ratingFilter.value) {
+      url += `&vote_average.gte=${ratingFilter.value}`;
+    }
+
+    const moodMap = {
+      happy: "35",
+      romantic: "10749",
+      dark: "27,53",
+      action: "28"
+    };
+
+    if (moodFilter.value && moodMap[moodFilter.value]) {
+      url += `&with_genres=${moodMap[moodFilter.value]}`;
+    }
+  }
 
   const raw = await fetchJSON(url);
-  console.log("BROWSE DATA:", raw);
-
   const data = normalizeResults(raw);
 
-  data.results.forEach(m => {
-    const card = movieCard(m);
-    if (card instanceof Node) {
-      grid.appendChild(card);
-    }
-  });
+  if (data.results.length === 0) {
+    loading = false;
+    return;
+  }
 
+  data.results.forEach(movie => {
+    grid.appendChild(movieCard(movie));
+  });
 
   loading = false;
 }
-
 window.addEventListener("scroll", () => {
-  if (inWatchlist) return;
+  if (loading || inWatchlist) return;
+
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
     page++;
     loadBrowse();
   }
 });
 
+
 /* =====================================================
    SEARCH & FILTERS
 ===================================================== */
-searchBox.addEventListener("input", debounce(resetBrowse, 400));
-genreFilter.onchange = resetBrowse;
-ratingFilter.onchange = resetBrowse;
-languageFilter.onchange = resetBrowse;
-moodFilter.onchange = resetBrowse;
+if (searchBox) {
+  searchBox.addEventListener("input", debounce(resetBrowse, 400));
+}
+if (genreFilter) genreFilter.onchange = resetBrowse;
+if (ratingFilter) ratingFilter.onchange = resetBrowse;
+if (languageFilter) languageFilter.onchange = resetBrowse;
+if (moodFilter) moodFilter.onchange = resetBrowse;
 
 function resetBrowse() {
   inWatchlist = false;
   page = 1;
-  grid.innerHTML = "";
-  loadBrowse();
+  if (grid) grid.innerHTML = "";
+  if (typeof loadBrowse === "function") loadBrowse();
 }
 
 /* =====================================================
    MOVIE CARD
 ===================================================== */
 function movieCard(movie) {
+  if (!movie) return null;
+
   const div = document.createElement("div");
   div.className = "card";
 
-  div.innerHTML = `
-   <img src="${movie.poster_path
+  const poster =
+    movie.poster_path
       ? IMG + movie.poster_path
       : movie.poster
         ? IMG + movie.poster
-        : "./no-image.png"
+        : "./no-image.png";
 
-    }">
-
-    <h4>${movie.title || movie.name}</h4>
+  div.innerHTML = `
+    <img src="${poster}">
+    <h4>${movie.title || movie.name || "Untitled"}</h4>
     <p>⭐ ${movie.vote_average || movie.rating || "N/A"}</p>
-
   `;
+
   div.onclick = () => {
     saveContinueWatching(movie, movie._type || currentType);
     openDetails(movie.id, movie._type || currentType);
   };
+
   return div;
-
 }
-
 
 /* =====================================================
    MOVIE DETAILS
 ===================================================== */
 async function openDetails(id, type = currentType) {
-  if (!id) {
-    console.warn("openDetails called with invalid id");
-    return;
-  }
+  const data = await fetchJSON(
+    `${TMDB_BASE}/${type}/${id}?api_key=${TMDB_KEY}&append_to_response=credits,videos`
+  );
 
-  const data = await fetchJSON(`${BACKEND}/api/movie/${id}?type=${type}`);
-  if (!data.details) return;
+  if (!data || !data.id) return;
 
-  const director =
-    data.credits?.crew?.find(p => p.job === "Director")?.name || "N/A";
-
-  const cast =
-    data.credits?.cast?.slice(0, 8).map(c => c.name).join(", ") || "N/A";
+  const trailer = data.videos?.results?.find(v => v.type === "Trailer");
 
   infoOverlay.innerHTML = `
-  <div class="detailsOverlay">
-    <div class="detailsCard">
-      <button class="closeDetails">✕</button>
+    <div class="detailsOverlay">
+      <div class="detailsCard">
+        <button class="closeDetails">✕</button>
 
-      <div class="detailsContent">
-        <div class="detailsPoster">
-          <img src="${data.details.poster_path
-      ? IMG + data.details.poster_path
-      : "https://via.placeholder.com/400x600?text=No+Image"}">
-        </div>
-
-        <div class="detailsInfo">
-          <h1>${data.details.title || data.details.name}</h1>
-
-          <div class="meta">
-            <span>⭐ ${data.details.vote_average?.toFixed(1)}</span>
-            <span>${data.details.original_language?.toUpperCase()}</span>
-            <span>${(data.details.release_date || data.details.first_air_date || "")
-      .slice(0, 4)
-    }</span>
-
+        <div class="detailsContent">
+          <div class="detailsPoster">
+            <img src="${data.poster_path ? IMG + data.poster_path : "./no-image.png"}">
           </div>
 
-          <div class="genres">
-            ${(data.details.genres || [])
-      .map(g => `<span class="genre">${g.name}</span>`)
-      .join("")}
-          </div>
+          <div class="detailsInfo">
+            <h1>${data.title || data.name}</h1>
 
-          <p class="overview">${data.details.overview}</p>
+            <div class="meta">
+              <span>⭐ ${data.vote_average?.toFixed(1)}</span>
+              <span>${data.original_language?.toUpperCase()}</span>
+              <span>${(data.release_date || data.first_air_date || "").slice(0, 4)}</span>
+            </div>
 
-          <p><b>Director:</b> ${data.credits?.crew?.find(p => p.job === "Director")?.name || "N/A"
+            <p class="overview">${data.overview}</p>
+
+            <p><b>Cast:</b> ${data.credits?.cast?.slice(0, 6).map(c => c.name).join(", ") || "N/A"
     }</p>
-
-          <p class="cast"><b>Cast:</b> ${data.credits?.cast?.slice(0, 6).map(c => c.name).join(", ") || "N/A"
-    }</p>
-
-          <div class="actions">
-            ${data.trailerKey
+<div class="actions">
+  ${trailer
       ? `<a class="btn primary" target="_blank"
-                   href="https://youtube.com/watch?v=${data.trailerKey}">
-                   ▶ Trailer
-                 </a>`
-      : ""}
+           href="https://youtube.com/watch?v=${trailer.key}">
+           ▶ Trailer
+         </a>`
+      : ""
+    }
 
-            <button class="btn secondary"
-              onclick="addToWatchlist(${id})">
-              ➕ Watchlist
-            </button>
+  <button class="btn secondary" onclick='addToWatchlist({
+    id: ${data.id},
+    title: "${(data.title || data.name).replace(/"/g, "")}",
+    poster_path: "${data.poster_path || ""}",
+    vote_average: ${data.vote_average || 0},
+    _type: "${type}"
+  })'>
+    ➕ Watchlist
+  </button>
 
-            <a class="btn ghost" target="_blank"
-              href="https://www.themoviedb.org/${type}/${id}/watch">
-              📺 Watch
-            </a>
+  <a class="btn ghost" target="_blank"
+     href="https://www.themoviedb.org/${type}/${data.id}/watch">
+     📺 Where to Watch
+  </a>
+</div>
+
           </div>
         </div>
       </div>
     </div>
-  </div>
-`;
-  infoOverlay.style.display = "flex";
+  `;
 
-  infoOverlay.onclick = () => (infoOverlay.style.display = "none");
-  document.querySelector(".detailsCard").onclick = e => e.stopPropagation();
+  infoOverlay.style.display = "flex";
   document.querySelector(".closeDetails").onclick = () =>
     (infoOverlay.style.display = "none");
-
-
 }
 
+
+/* =====================================================
+   LOGIN PROMPT
+===================================================== */
 function showLoginPrompt() {
+  if (!grid) return;
+
   grid.innerHTML = `
     <div class="watchlistPrompt">
       <h2>Please login to view your watchlist</h2>
@@ -532,9 +461,12 @@ function showLoginPrompt() {
     </div>
   `;
 
-  document.getElementById("loginFromWatchlist").onclick = () => {
-    authModal.style.display = "flex";
-  };
+  const btn = document.getElementById("loginFromWatchlist");
+  if (btn) {
+    btn.onclick = () => {
+      authModal.style.display = "flex";
+    };
+  }
 }
 
 /* =====================================================
@@ -545,6 +477,8 @@ function addToWatchlist(movie) {
     showLoginPrompt();
     return;
   }
+
+  if (!movie || !movie.id) return;
 
   let list = getUserWatchlist();
 
@@ -559,7 +493,6 @@ function addToWatchlist(movie) {
   alert("Added to Watchlist ⭐");
 }
 
-
 function getUserWatchlist() {
   if (!currentUser) return [];
   return JSON.parse(
@@ -568,21 +501,27 @@ function getUserWatchlist() {
 }
 
 function saveUserWatchlist(list) {
+  if (!currentUser) return;
   localStorage.setItem(
     `watchlist_${currentUser.email}`,
     JSON.stringify(list)
   );
 }
+
 function openWatchlist() {
-  setActiveTab(navWatchlist);
+  if (typeof setActiveTab === "function" && navWatchlist) {
+    setActiveTab(navWatchlist);
+  }
 
   if (!currentUser) {
     showLoginPrompt();
     return;
   }
 
-  const list = getUserWatchlist();
+  if (!grid) return;
   grid.innerHTML = "";
+
+  const list = getUserWatchlist();
 
   if (!list.length) {
     grid.innerHTML = `<h2 style="color:#aaa">Your watchlist is empty 🍿</h2>`;
@@ -590,34 +529,124 @@ function openWatchlist() {
   }
 
   list.forEach(movie => {
-    grid.appendChild(movieCard(movie));
+    const card = movieCard(movie);
+    if (card) grid.appendChild(card);
   });
 }
 
+/* =====================================================
+   AUTH ACTIONS
+===================================================== */
+if (authToggle) {
+  authToggle.onclick = () => {
+    isSignup = !isSignup;
+    authTitle.innerText = isSignup ? "Create Profile" : "Sign In";
+    authName.style.display = isSignup ? "block" : "none";
+    authMsg.innerText = "";
+  };
+}
 
+if (authSubmit) {
+  authSubmit.onclick = () => {
+    authMsg.innerText = "";
 
+    const email = authEmail.value.trim();
+    const password = authPassword.value.trim();
+    const name = authName.value.trim();
+
+    if (!email || !password || (isSignup && !name)) {
+      authMsg.innerText = "All fields are required";
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    // SIGN UP
+    if (isSignup) {
+      if (users.find(u => u.email === email)) {
+        authMsg.innerText = "User already exists";
+        return;
+      }
+
+      users.push({ name, email, password });
+      localStorage.setItem("users", JSON.stringify(users));
+
+      authMsg.innerText = "Signup successful! Please login.";
+      isSignup = false;
+      authTitle.innerText = "Sign In";
+      authName.style.display = "none";
+      return;
+    }
+
+    // LOGIN
+    const user = users.find(
+      u => u.email === email && u.password === password
+    );
+
+    if (!user) {
+      authMsg.innerText = "Invalid email or password";
+      return;
+    }
+
+    currentUser = user;
+    localStorage.setItem("currentUser", JSON.stringify(user));
+
+    if (loginBtn) loginBtn.style.display = "none";
+    if (profileWrapper) profileWrapper.style.display = "flex";
+    if (profileAvatar) profileAvatar.innerText = user.name.charAt(0);
+
+    if (authModal) authModal.style.display = "none";
+  };
+}
+
+/* =====================================================
+   AUTH (LOCALSTORAGE ONLY – NETLIFY SAFE)
+===================================================== */
+function updateAuthUI() {
+  if (currentUser) {
+    loginBtn.style.display = "none";
+    profileWrapper.style.display = "flex";
+    profileAvatar.innerText = currentUser.name.charAt(0);
+  } else {
+    loginBtn.style.display = "block";
+    profileWrapper.style.display = "none";
+  }
+}
+
+updateAuthUI();
+
+// Open auth modal
+loginBtn.onclick = () => {
+  authModal.style.display = "flex";
+  authMsg.innerText = "";
+};
+
+// Close modal
+closeAuth.onclick = () => {
+  authModal.style.display = "none";
+};
+
+// Toggle login / signup
 authToggle.onclick = () => {
   isSignup = !isSignup;
-  authTitle.innerText = isSignup ? "Create Profile" : "Sign In";
+  authTitle.innerText = isSignup ? "Create Account" : "Sign In";
   authName.style.display = isSignup ? "block" : "none";
   authMsg.innerText = "";
 };
 
+// Submit auth
 authSubmit.onclick = () => {
-  authMsg.innerText = "";
-
   const email = authEmail.value.trim();
   const password = authPassword.value.trim();
   const name = authName.value.trim();
 
   if (!email || !password || (isSignup && !name)) {
-    authMsg.innerText = "All fields are required";
+    authMsg.innerText = "All fields required";
     return;
   }
 
-  let users = JSON.parse(localStorage.getItem("users") || "[]");
+  let users = JSON.parse(localStorage.getItem("users")) || [];
 
-  // SIGN UP
   if (isSignup) {
     if (users.find(u => u.email === email)) {
       authMsg.innerText = "User already exists";
@@ -627,14 +656,13 @@ authSubmit.onclick = () => {
     users.push({ name, email, password });
     localStorage.setItem("users", JSON.stringify(users));
 
-    authMsg.innerText = "Signup successful! Please login.";
+    authMsg.innerText = "Signup successful. Please login.";
     isSignup = false;
     authTitle.innerText = "Sign In";
     authName.style.display = "none";
     return;
   }
 
-  // LOGIN
   const user = users.find(
     u => u.email === email && u.password === password
   );
@@ -647,30 +675,23 @@ authSubmit.onclick = () => {
   currentUser = user;
   localStorage.setItem("currentUser", JSON.stringify(user));
 
-  loginBtn.style.display = "none";
-  profileWrapper.style.display = "flex";
-  profileAvatar.innerText = user.name.charAt(0);
-
   authModal.style.display = "none";
+  updateAuthUI();
 };
 
 
-
-
-/* =====================================================
-   UTIL
-===================================================== */
 function debounce(fn, delay) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
   };
 }
 
 
-// expose functions for inline HTML usage
+// expose functions
 window.openWatchlist = openWatchlist;
-
 
 
