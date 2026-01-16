@@ -2,7 +2,7 @@
    AUTH STATE (LOCALSTORAGE – NETLIFY SAFE)
 ===================================================== */
 
-let searchBox;
+let searchBox - null;
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_KEY = "8dd19f897799957dab98b123ccd611d2";
@@ -623,6 +623,17 @@ if (authSubmit) {
    AUTH (LOCALSTORAGE ONLY – NETLIFY SAFE)
 ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
+   searchBox = document.getElementById("searchBox");
+  if (searchBtn) {
+    searchBtn.addEventListener("click", () => {
+      page = 1;
+      loading = false;
+      inWatchlist = false;
+      if (grid) grid.innerHTML = "";
+      loadBrowse();
+    });
+  }
+
 
   // ===== ELEMENTS =====
   const loginBtn = document.getElementById("loginBtn");
@@ -761,4 +772,5 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
+
 
