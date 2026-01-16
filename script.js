@@ -295,6 +295,9 @@ if (ratingFilter.value) {
 if (genreFilter.value) {
   url += `&with_genres=${genreFilter.value}`;
 }
+     if (moodFilter.value && moodMap[moodFilter.value]) {
+  url += `&with_genres=${moodMap[moodFilter.value]}`;
+}
 
 
     const moodMap = {
@@ -710,6 +713,7 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
+
 
 
 
