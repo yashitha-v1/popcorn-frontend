@@ -1,6 +1,13 @@
 /* =====================================================
    CONFIG
 ===================================================== */
+
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+if (!currentUser) {
+  window.location.href = "login.html";
+}
+
 const API_BASE = "https://popcorn-backend-production.up.railway.app";
 const BACKEND = "https://popcorn-backend-production.up.railway.app";
 
@@ -59,7 +66,7 @@ let loading = false;
 let inWatchlist = false;
 let isSignup = false;
 
-let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
 let watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
 
 /* =====================================================
@@ -757,6 +764,14 @@ async function addToWatchlist(movieId) {
   } catch (err) {
     alert("Server error while adding to watchlist");
   }
+}
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("currentUser");
+    window.location.href = "login.html";
+  });
 }
 
 
