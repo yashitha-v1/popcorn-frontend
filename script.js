@@ -624,31 +624,51 @@ if (authSubmit) {
 ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
 
+  // ===== ELEMENTS =====
+  const loginBtn = document.getElementById("loginBtn");
+  const profileWrapper = document.getElementById("profileWrapper");
+  const profileAvatar = document.getElementById("profileAvatar");
+  const profileMenu = document.getElementById("profileMenu");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const authModal = document.getElementById("authModal");
+  const closeAuth = document.getElementById("closeAuth");
+  const authTitle = document.getElementById("authTitle");
+  const authName = document.getElementById("authName");
+  const authEmail = document.getElementById("authEmail");
+  const authPassword = document.getElementById("authPassword");
+  const authSubmit = document.getElementById("authSubmit");
+  const authToggle = document.getElementById("authToggle");
+  const authMsg = document.getElementById("authMsg");
+
+  let isSignup = false;
+  let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+  // ===== UI UPDATE =====
   function updateAuthUI() {
     if (currentUser) {
       loginBtn.style.display = "none";
       profileWrapper.style.display = "flex";
-      profileAvatar.innerText = currentUser.name.charAt(0);
+      profileAvatar.innerText =
+        currentUser.name?.charAt(0).toUpperCase() || "👤";
     } else {
       loginBtn.style.display = "block";
       profileWrapper.style.display = "none";
+      profileMenu.style.display = "none";
     }
   }
 
-  updateAuthUI();
-
-  // Open auth modal
+  // ===== OPEN / CLOSE MODAL =====
   loginBtn.onclick = () => {
     authModal.style.display = "flex";
     authMsg.innerText = "";
   };
 
-  // Close modal
   closeAuth.onclick = () => {
     authModal.style.display = "none";
   };
 
-  // Toggle login / signup
+  // ===== TOGGLE LOGIN / SIGNUP =====
   authToggle.onclick = () => {
     isSignup = !isSignup;
     authTitle.innerText = isSignup ? "Create Account" : "Sign In";
@@ -656,7 +676,7 @@ document.addEventListener("DOMContentLoaded", () => {
     authMsg.innerText = "";
   };
 
-  // Submit auth
+  // ===== SUBMIT AUTH =====
   authSubmit.onclick = () => {
     const email = authEmail.value.trim();
     const password = authPassword.value.trim();
@@ -669,7 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let users = JSON.parse(localStorage.getItem("users") || "[]");
 
-    // SIGN UP
+    // SIGNUP
     if (isSignup) {
       if (users.find(u => u.email === email)) {
         authMsg.innerText = "User already exists";
@@ -703,7 +723,30 @@ document.addEventListener("DOMContentLoaded", () => {
     updateAuthUI();
   };
 
+  // ===== AVATAR CLICK → SHOW LOGOUT =====
+  profileAvatar.addEventListener("click", (e) => {
+    e.stopPropagation();
+    profileMenu.style.display =
+      profileMenu.style.display === "block" ? "none" : "block";
+  });
+
+  // ===== LOGOUT =====
+  logoutBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    localStorage.removeItem("currentUser");
+    currentUser = null;
+    updateAuthUI();
+  });
+
+  // ===== CLOSE MENU ON OUTSIDE CLICK =====
+  document.addEventListener("click", () => {
+    profileMenu.style.display = "none";
+  });
+
+  // ===== INIT =====
+  updateAuthUI();
 });
+
 
 
 
@@ -720,6 +763,7 @@ function debounce(fn, delay) {
 
 // expose functions
 window.openWatchlist = openWatchlist;
+
 
 
 
